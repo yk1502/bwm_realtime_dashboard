@@ -1,0 +1,53 @@
+/* --- Global & Layout --- */
+.dashboard-container { min-height: 100vh; background-color: #f9fafb; padding: 2rem 4rem; font-family: 'Segoe UI', sans-serif; color: #1f2937; }
+.title { font-size: 3.5rem; font-weight: 800; color: #111827; margin: 0; }
+.dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; }
+.header-actions { display: flex; align-items: center; gap: 2rem; }
+.header-nav { display: flex; gap: 1.5rem; }
+.header-nav span { cursor: pointer; color: #374151; font-weight: 600; font-size: 0.95rem; transition: 0.2s; }
+.header-nav span:hover { color: #0f766e; text-decoration: underline; }
+
+.main-layout-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 2rem; max-width: 1400px; margin: 0 auto; }
+.right-column { display: flex; flex-direction: column; gap: 1.5rem; }
+
+/* --- Card Styling --- */
+.card { background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 2rem; border: 1px solid #f3f4f6; }
+.card-header { font-size: 1.5rem; color: #374151; margin-bottom: 1.5rem; text-align: center; }
+
+/* --- Carousel --- */
+.carousel-view { position: relative; overflow: hidden; width: 100%; }
+.carousel-track { display: flex; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.carousel-slide { min-width: 100%; display: flex; flex-direction: column; align-items: center; }
+.progress-bg { width: 100%; background: #e5e7eb; border-radius: 10px; height: 12px; margin-bottom: 1rem; overflow: hidden; }
+.progress-fill-orange { background: #f97316; height: 100%; }
+.internal-hero-image { width: 100%; border-radius: 12px; margin-top: 1.5rem; object-fit: cover; }
+
+/* --- Dual Gauges Fix --- */
+.stats-card { display: flex; flex-direction: column; align-items: center; padding: 2rem !important; }
+.gauge-row-container { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 2rem; }
+.gauge-section { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.gauge-divider-vertical { width: 1px; height: 100px; background: #f3f4f6; margin: 0 1rem; }
+.gauge-footer-actions { width: 100%; display: flex; justify-content: center; gap: 2rem; }
+
+.stat-value { font-size: 3.5rem; font-weight: 800; color: #0f766e; line-height: 1; }
+.stat-value.financial { color: #b45309; font-size: 2.2rem; margin-top: 0.5rem; }
+.mini-progress-bg { width: 85%; background: #e5e7eb; height: 8px; border-radius: 10px; margin-top: 0.8rem; overflow: hidden; }
+.progress-fill-teal { background: #0f766e; height: 100%; }
+.progress-fill-gold { background: #f59e0b; height: 100%; }
+
+/* --- Vertical List Cards --- */
+.list-card { display: flex; gap: 1.5rem; padding: 1.5rem; }
+.card-sidebar { display: flex; flex-direction: column; align-items: center; gap: 0.8rem; }
+.btn-history { background: #0f766e; color: white; border: none; font-size: 0.75rem; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+.list-title { color: #0f766e; font-size: 1.25rem; margin-bottom: 1rem; }
+.item-entry { border-bottom: 1px solid #f3f4f6; padding-bottom: 0.8rem; margin-bottom: 1rem; }
+.item-entry:last-child { border-bottom: none; }
+.item-title-text { font-weight: 700; color: #374151; font-size: 1.05rem; margin-bottom: 0.3rem; }
+.item-meta { font-size: 0.9rem; color: #9ca3af; display: flex; justify-content: space-between; }
+
+/* --- Buttons --- */
+.btn-register, .btn-donate { padding: 0.7rem 2rem; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; color: white; min-width: 140px; transition: 0.2s; }
+.btn-register { background: #0f766e; }
+.btn-donate { background: #f59e0b; }
+.btn-register:hover, .btn-donate:hover { opacity: 0.9; transform: translateY(-1px); }
+.nav-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.7); border: none; border-radius: 50%; padding: 10px; color: #0f766e; cursor: pointer; z-index: 10; }
