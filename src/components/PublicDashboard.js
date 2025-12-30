@@ -127,7 +127,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                         </div>
                     </section>
 
-                    {/* Volunteer List: Updates to use 'groupname' and navigate to detail pages */}
+                    {/* Volunteer List: Updates to use 'group_name' and navigate to detail pages */}
                     <section className="card list-card">
                         <div className="card-sidebar">
                             <Smile size={32} color="#0f766e" />
@@ -138,7 +138,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                             {volunteerEvents.slice(0, 2).map((event) => (
                                 <div key={event.id} className="item-entry" onClick={() => navigate(`/volunteer-detail/${event.id}`)} style={{cursor: 'pointer'}}>
                                     <p className="item-title-text">{event.title}</p>
-                                    <p className="item-meta">{event.impact} <span>{event.groupname} • {event.date}</span></p>
+                                    <p className="item-meta">{event.impact} <span>{event.group_name} • {event.date}</span></p>
                                 </div>
                             ))}
                         </div>

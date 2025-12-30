@@ -18,7 +18,7 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
     const [imageFile, setImageFile] = useState(null);
     const [uploading, setUploading] = useState(false);
 
-    const [newVolunteer, setNewVolunteer] = useState({ title: '', groupname: '', impact: '', date: '', description: '' });
+    const [newVolunteer, setNewVolunteer] = useState({ title: '', group_name: '', impact: '', date: '', description: '' });
     const [newLibraryItem, setNewLibraryItem] = useState({ title: '', donor: '', category: '', date: '', description: '' });
 
     const [localMembership, setLocalMembership] = useState(membershipCount || 0);
@@ -90,7 +90,7 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
     const handleAddVolunteer = async (e) => {
         e.preventDefault();
         const { error } = await supabase.from('volunteer_events').insert([newVolunteer]);
-        if (!error) { setShowVolModal(false); setNewVolunteer({ title: '', groupname: '', impact: '', date: '', description: '' }); }
+        if (!error) { setShowVolModal(false); setNewVolunteer({ title: '', group_name: '', impact: '', date: '', description: '' }); }
         else { alert("Volunteer Error: " + error.message); }
     };
 
@@ -197,7 +197,7 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                                     {volunteerEvents.map((ev) => (
                                         <tr key={ev.id} className="teal-row">
                                             <td>{ev.date}</td>
-                                            <td>{ev.groupname}</td>
+                                            <td>{ev.group_name}</td>
                                             <td>{ev.title}</td>
                                             <td><Trash2 size={18} className="pointer" color="#ef4444" onClick={() => {}} /></td>
                                         </tr>
@@ -287,7 +287,7 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
             )}
             
             {showVolModal && (
-                <div className="modal-bg"><div className="modal-box"><div className="modal-head"><h2>Log Volunteer Impact</h2><X onClick={() => setShowVolModal(false)} className="pointer" /></div><form onSubmit={handleAddVolunteer} className="modal-form"><input placeholder="Title" required value={newVolunteer.title} onChange={e => setNewVolunteer({...newVolunteer, title: e.target.value})} /><input placeholder="Group" required value={newVolunteer.groupname} onChange={e => setNewVolunteer({...newVolunteer, groupname: e.target.value})} /><input placeholder="Impact" required value={newVolunteer.impact} onChange={e => setNewVolunteer({...newVolunteer, impact: e.target.value})} /><input type="date" required value={newVolunteer.date} onChange={e => setNewVolunteer({...newVolunteer, date: e.target.value})} /><textarea placeholder="Description" required value={newVolunteer.description} onChange={e => setNewVolunteer({...newVolunteer, description: e.target.value})} /><button type="submit" className="btn-add-main">Save Impact</button></form></div></div>
+                <div className="modal-bg"><div className="modal-box"><div className="modal-head"><h2>Log Volunteer Impact</h2><X onClick={() => setShowVolModal(false)} className="pointer" /></div><form onSubmit={handleAddVolunteer} className="modal-form"><input placeholder="Title" required value={newVolunteer.title} onChange={e => setNewVolunteer({...newVolunteer, title: e.target.value})} /><input placeholder="Group" required value={newVolunteer.group_name} onChange={e => setNewVolunteer({...newVolunteer, group_name: e.target.value})} /><input placeholder="Impact" required value={newVolunteer.impact} onChange={e => setNewVolunteer({...newVolunteer, impact: e.target.value})} /><input type="date" required value={newVolunteer.date} onChange={e => setNewVolunteer({...newVolunteer, date: e.target.value})} /><textarea placeholder="Description" required value={newVolunteer.description} onChange={e => setNewVolunteer({...newVolunteer, description: e.target.value})} /><button type="submit" className="btn-add-main">Save Impact</button></form></div></div>
             )}
             {showLibModal && (
                 <div className="modal-bg"><div className="modal-box"><div className="modal-head"><h2>Add Library Item</h2><X onClick={() => setShowLibModal(false)} className="pointer" /></div><form onSubmit={handleAddLibraryItem} className="modal-form"><input placeholder="Title" required value={newLibraryItem.title} onChange={e => setNewLibraryItem({...newLibraryItem, title: e.target.value})} /><input placeholder="Donor Name" required value={newLibraryItem.donor} onChange={e => setNewLibraryItem({...newLibraryItem, donor: e.target.value})} /><input placeholder="Category" required value={newLibraryItem.category} onChange={e => setNewLibraryItem({...newLibraryItem, category: e.target.value})} /><input type="date" required value={newLibraryItem.date} onChange={e => setNewLibraryItem({...newLibraryItem, date: e.target.value})} /><textarea placeholder="Item Description" required value={newLibraryItem.description} onChange={e => setNewLibraryItem({...newLibraryItem, description: e.target.value})} /><button type="submit" className="btn-add-main">Save Item</button></form></div></div>
