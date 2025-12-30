@@ -51,6 +51,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                                             <div className="progress-wrapper">
                                                 <div className="progress-label">
                                                     <span>{c.name}</span>
+                                                    {/* Updated to match Supabase field names */}
                                                     <span><strong>{c.slotsfilled || 0} / {c.targetgoal || 0}</strong> Seats</span>
                                                 </div>
                                                 <div className="progress-bg">
@@ -70,7 +71,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                                     </div>
                                 ))}
                             </div>
-                            {/* Navigation buttons: CSS handles the 'prev' and 'next' positioning */}
+                            {/* Navigation buttons: structure allows for CSS 'prev' and 'next' positioning */}
                             {campaigns.length > 1 && (
                                 <>
                                     <button className="nav-btn prev" onClick={prevSlide}><ChevronLeft size={30} /></button>
@@ -81,9 +82,8 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                     </section>
                 </div>
 
-                {/* --- Right Column --- */}
+                {/* --- Right Column: Gauges and Activity Lists --- */}
                 <div className="right-column">
-                    {/* Membership & Donation Gauges */}
                     <section className="card stats-card">
                         <div className="gauge-row-container">
                             <div className="gauge-section">
@@ -110,7 +110,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                         </div>
                     </section>
 
-                    {/* Library List */}
+                    {/* Library List: Updates to navigate to detail pages */}
                     <section className="card list-card">
                         <div className="card-sidebar">
                             <Smile size={32} color="#0f766e" />
@@ -118,8 +118,8 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                         </div>
                         <div className="card-list-content">
                             <h3 className="list-title">New Library Acquisitions</h3>
-                            {libraryItems.slice(0, 3).map((item, idx) => (
-                                <div key={idx} className="item-entry" onClick={() => navigate(`/library-detail/${item.id}`)} style={{cursor: 'pointer'}}>
+                            {libraryItems.slice(0, 3).map((item) => (
+                                <div key={item.id} className="item-entry" onClick={() => navigate(`/library-detail/${item.id}`)} style={{cursor: 'pointer'}}>
                                     <p className="item-title-text">{item.title}</p>
                                     <p className="item-meta">Donor: {item.donor} <span>{item.date}</span></p>
                                 </div>
@@ -127,7 +127,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                         </div>
                     </section>
 
-                    {/* Updated Volunteer List: uses 'group_name' and dynamic navigation */}
+                    {/* Volunteer List: Updates to use 'groupname' and navigate to detail pages */}
                     <section className="card list-card">
                         <div className="card-sidebar">
                             <Smile size={32} color="#0f766e" />
@@ -138,9 +138,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                             {volunteerEvents.slice(0, 2).map((event) => (
                                 <div key={event.id} className="item-entry" onClick={() => navigate(`/volunteer-detail/${event.id}`)} style={{cursor: 'pointer'}}>
                                     <p className="item-title-text">{event.title}</p>
-                                    <p className="item-meta">
-                                        {event.impact} <span>{event.group_name} • {event.date}</span>
-                                    </p>
+                                    <p className="item-meta">{event.impact} <span>{event.groupname} • {event.date}</span></p>
                                 </div>
                             ))}
                         </div>

@@ -17,11 +17,10 @@ function App() {
     const [financialData, setFinancialData] = useState({ current: 0, target: 0 });
     const [membershipCount, setMembershipCount] = useState(0);
     const [campaigns, setCampaigns] = useState([]);
-    const [libraryItems, setLibraryItems] = useState([
-        { id: 1, title: "Old Kuala Lumpur Map (1920)", donor: "John Doe", category: "Cartography", date: "22 Dec 2025", description: "A rare hand-drawn map showing the colonial layout of central KL." }
-    ]);
-    // Changed: Initialized as empty array for database fetching
     const [volunteerEvents, setVolunteerEvents] = useState([]);
+    
+    // Changed: Initialized as empty array for database fetching
+    const [libraryItems, setLibraryItems] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -33,9 +32,12 @@ function App() {
             const { data: campData } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
             if (campData) setCampaigns(campData);
 
-            // Added: Fetch volunteer events from Supabase
             const { data: volData } = await supabase.from('volunteer_events').select('*').order('date', { ascending: false });
             if (volData) setVolunteerEvents(volData);
+
+            // Added: Fetch library items from Supabase
+            const { data: libData } = await supabase.from('library_items').select('*').order('date', { ascending: false });
+            if (libData) setLibraryItems(libData);
         };
 
         fetchData();
@@ -53,7 +55,6 @@ function App() {
                 else if (payload.eventType === 'DELETE') setCampaigns(prev => prev.filter(c => c.id !== payload.old.id));
             }).subscribe();
 
-        // Added: Real-time listener for volunteer_events
         const volChannel = supabase.channel('realtime_volunteers')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'volunteer_events' }, (payload) => {
                 if (payload.eventType === 'INSERT') setVolunteerEvents(prev => [payload.new, ...prev]);
@@ -61,37 +62,31 @@ function App() {
                 else if (payload.eventType === 'DELETE') setVolunteerEvents(prev => prev.filter(v => v.id !== payload.old.id));
             }).subscribe();
 
+        // Added: Real-time listener for library_items
+        const libChannel = supabase.channel('realtime_library')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'library_items' }, (payload) => {
+                if (payload.eventType === 'INSERT') setLibraryItems(prev => [payload.new, ...prev]);
+                else if (payload.eventType === 'UPDATE') setLibraryItems(prev => prev.map(i => i.id === payload.new.id ? payload.new : i));
+                else if (payload.eventType === 'DELETE') setLibraryItems(prev => prev.filter(i => i.id !== payload.old.id));
+            }).subscribe();
+
         return () => {
             supabase.removeChannel(statsChannel);
             supabase.removeChannel(campChannel);
             supabase.removeChannel(volChannel);
+            supabase.removeChannel(libChannel);
         };
     }, []);
 
     return (
         <Router>
             <Routes>
-                <Route path="/" element={
-                    <PublicDashboard 
-                        campaigns={campaigns} 
-                        libraryItems={libraryItems} 
-                        volunteerEvents={volunteerEvents} 
-                        membershipCount={membershipCount} 
-                        financialData={financialData} 
-                    />
-                } />
-                <Route path="/admin" element={
-                    <AdminPanel 
-                        campaigns={campaigns} 
-                        libraryItems={libraryItems} setLibraryItems={setLibraryItems}
-                        volunteerEvents={volunteerEvents} setVolunteerEvents={setVolunteerEvents}
-                        financialData={financialData} 
-                        membershipCount={membershipCount} 
-                    />
-                } />
+                <Route path="/" element={<PublicDashboard campaigns={campaigns} libraryItems={libraryItems} volunteerEvents={volunteerEvents} membershipCount={membershipCount} financialData={financialData} />} />
+                <Route path="/admin" element={<AdminPanel campaigns={campaigns} libraryItems={libraryItems} volunteerEvents={volunteerEvents} financialData={financialData} membershipCount={membershipCount} />} />
                 <Route path="/volunteer-timeline" element={<VolunteerTimeline events={volunteerEvents} />} />
                 <Route path="/volunteer-detail/:id" element={<VolunteerEventDetail events={volunteerEvents} />} />
                 <Route path="/library-archive" element={<LibraryArchive items={libraryItems} />} />
+                <Route path="/library-detail/:id" element={<LibraryItemDetail items={libraryItems} />} />
                 <Route path="/donate" element={<DonationPage financialData={financialData} />} />
                 <Route path="/membership-registration" element={<MembershipRegistration membershipCount={membershipCount} />} />
                 <Route path="/event-registration/:id" element={<EventRegistration />} />
