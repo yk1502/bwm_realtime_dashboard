@@ -3,18 +3,21 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import {
     X, ClipboardList, BookCheck, DollarSign, Users,
-    LogOut, Plus, Trash2
+    LogOut, Plus, Trash2, Upload
 } from 'lucide-react';
 import './Admin.css';
 
-// Added onLogout to props
 const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, membershipCount, onLogout }) => {
     const [currentView, setCurrentView] = useState('campaigns');
     const [showModal, setShowModal] = useState(false);
     const [showVolModal, setShowVolModal] = useState(false);
     const [showLibModal, setShowLibModal] = useState(false);
     
-    const [newCampaign, setNewCampaign] = useState({ name: '', targetGoal: 0, image: '', status: 'Active' });
+    // State for campaign including the file object
+    const [newCampaign, setNewCampaign] = useState({ name: '', targetGoal: 0, status: 'Active' });
+    const [imageFile, setImageFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
+
     const [newVolunteer, setNewVolunteer] = useState({ title: '', groupname: '', impact: '', date: '', description: '' });
     const [newLibraryItem, setNewLibraryItem] = useState({ title: '', donor: '', category: '', date: '', description: '' });
 
@@ -28,15 +31,50 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
 
     const handleAddCampaign = async (e) => {
         e.preventDefault();
-        const { error } = await supabase.from('campaigns').insert([{
-            name: newCampaign.name,
-            targetgoal: parseInt(newCampaign.targetGoal),
-            image: newCampaign.image,
-            status: 'Active',
-            slotsfilled: 0
-        }]);
-        if (!error) { setShowModal(false); setNewCampaign({ name: '', targetGoal: 0, image: '', status: 'Active' }); }
-        else { alert("Campaign Error: " + error.message); }
+        setUploading(true);
+
+        try {
+            let publicUrl = '';
+
+            // 1. Upload Image to Supabase Storage
+            if (imageFile) {
+                const fileExt = imageFile.name.split('.').pop();
+                const fileName = `${Math.random()}.${fileExt}`;
+                const filePath = `campaigns/${fileName}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('campaign-images')
+                    .upload(filePath, imageFile);
+
+                if (uploadError) throw uploadError;
+
+                // 2. Get Public URL
+                const { data } = supabase.storage
+                    .from('campaign-images')
+                    .getPublicUrl(filePath);
+                
+                publicUrl = data.publicUrl;
+            }
+
+            // 3. Insert Campaign Row into Database
+            const { error } = await supabase.from('campaigns').insert([{
+                name: newCampaign.name,
+                targetgoal: parseInt(newCampaign.targetGoal),
+                image: publicUrl, // Store the new public URL here
+                status: 'Active',
+                slotsfilled: 0
+            }]);
+
+            if (error) throw error;
+
+            setShowModal(false);
+            setNewCampaign({ name: '', targetGoal: 0, status: 'Active' });
+            setImageFile(null);
+        } catch (error) {
+            alert("Campaign Error: " + error.message);
+        } finally {
+            setUploading(false);
+        }
     };
 
     const handleAddVolunteer = async (e) => {
@@ -53,7 +91,7 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
             setShowLibModal(false);
             setNewLibraryItem({ title: '', donor: '', category: '', date: '', description: '' });
         } else {
-            alert("Library Error: " + error.message + " (Ensure table name is 'library_items')");
+            alert("Library Error: " + error.message);
         }
     };
 
@@ -161,7 +199,6 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                     <button onClick={() => setCurrentView('volunteer')} className={`nav-item ${currentView === 'volunteer' ? 'active' : ''}`}><Users size={18} /> Volunteers</button>
                     <button onClick={() => setCurrentView('financials')} className={`nav-item ${currentView === 'financials' ? 'active' : ''}`}><DollarSign size={18} /> Finance</button>
                 </nav>
-                {/* Changed from <a> to <button> to handle logout state */}
                 <button onClick={onLogout} className="exit-link" style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
                     <LogOut size={18} /> Logout
                 </button>
@@ -170,9 +207,54 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                 <header className="body-header"><h1>{currentView.toUpperCase()}</h1></header>
                 {renderView()}
             </main>
+
+            {/* Modal for New Campaign with Image Upload */}
             {showModal && (
-                <div className="modal-bg"><div className="modal-box"><div className="modal-head"><h2>New Campaign</h2><X onClick={() => setShowModal(false)} className="pointer" /></div><form onSubmit={handleAddCampaign} className="modal-form"><input placeholder="Name" required value={newCampaign.name} onChange={e => setNewCampaign({...newCampaign, name: e.target.value})} /><input placeholder="Target Seats" type="number" required value={newCampaign.targetGoal} onChange={e => setNewCampaign({...newCampaign, targetGoal: e.target.value})} /><input placeholder="Image URL" required value={newCampaign.image} onChange={e => setNewCampaign({...newCampaign, image: e.target.value})} /><button type="submit" className="btn-add-main">Save Campaign</button></form></div></div>
+                <div className="modal-bg">
+                    <div className="modal-box">
+                        <div className="modal-head">
+                            <h2>New Campaign</h2>
+                            <X onClick={() => setShowModal(false)} className="pointer" />
+                        </div>
+                        <form onSubmit={handleAddCampaign} className="modal-form">
+                            <input 
+                                placeholder="Name" 
+                                required 
+                                value={newCampaign.name} 
+                                onChange={e => setNewCampaign({...newCampaign, name: e.target.value})} 
+                            />
+                            <input 
+                                placeholder="Target Seats" 
+                                type="number" 
+                                required 
+                                value={newCampaign.targetGoal} 
+                                onChange={e => setNewCampaign({...newCampaign, targetGoal: e.target.value})} 
+                            />
+                            
+                            {/* File Upload Input */}
+                            <div className="input-group">
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '10px', border: '1px dashed #ccc', borderRadius: '4px', textAlign: 'center' }}>
+                                    <Upload size={18} />
+                                    {imageFile ? imageFile.name : "Select Image File"}
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        required 
+                                        style={{ display: 'none' }}
+                                        onChange={e => setImageFile(e.target.files[0])} 
+                                    />
+                                </label>
+                            </div>
+
+                            <button type="submit" className="btn-add-main" disabled={uploading}>
+                                {uploading ? "Uploading..." : "Save Campaign"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
             )}
+            
+            {/* ... other modals remain the same ... */}
             {showVolModal && (
                 <div className="modal-bg"><div className="modal-box"><div className="modal-head"><h2>Log Volunteer Impact</h2><X onClick={() => setShowVolModal(false)} className="pointer" /></div><form onSubmit={handleAddVolunteer} className="modal-form"><input placeholder="Title" required value={newVolunteer.title} onChange={e => setNewVolunteer({...newVolunteer, title: e.target.value})} /><input placeholder="Group" required value={newVolunteer.groupname} onChange={e => setNewVolunteer({...newVolunteer, groupname: e.target.value})} /><input placeholder="Impact" required value={newVolunteer.impact} onChange={e => setNewVolunteer({...newVolunteer, impact: e.target.value})} /><input type="date" required value={newVolunteer.date} onChange={e => setNewVolunteer({...newVolunteer, date: e.target.value})} /><textarea placeholder="Description" required value={newVolunteer.description} onChange={e => setNewVolunteer({...newVolunteer, description: e.target.value})} /><button type="submit" className="btn-add-main">Save Impact</button></form></div></div>
             )}
