@@ -13,7 +13,7 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
     const [showVolModal, setShowVolModal] = useState(false);
     const [showLibModal, setShowLibModal] = useState(false);
     
-    // State for campaign including the file object
+    // Campaign State
     const [newCampaign, setNewCampaign] = useState({ name: '', targetGoal: 0, status: 'Active' });
     const [imageFile, setImageFile] = useState(null);
     const [uploading, setUploading] = useState(false);
@@ -28,6 +28,16 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
         if (membershipCount !== undefined) setLocalMembership(membershipCount);
         if (financialData) setLocalFinancial(financialData);
     }, [membershipCount, financialData]);
+
+    // NEW: Handle Campaign Deletion
+    const handleDeleteCampaign = async (id) => {
+        if (window.confirm("Are you sure you want to delete this campaign? This action cannot be undone.")) {
+            const { error } = await supabase.from('campaigns').delete().eq('id', id);
+            if (error) {
+                alert("Delete Error: " + error.message);
+            }
+        }
+    };
 
     const handleAddCampaign = async (e) => {
         e.preventDefault();
@@ -56,11 +66,11 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                 publicUrl = data.publicUrl;
             }
 
-            // 3. Insert Campaign Row into Database
+            // 3. Insert Campaign into Database
             const { error } = await supabase.from('campaigns').insert([{
                 name: newCampaign.name,
                 targetgoal: parseInt(newCampaign.targetGoal),
-                image: publicUrl, // Store the new public URL here
+                image: publicUrl,
                 status: 'Active',
                 slotsfilled: 0
             }]);
@@ -121,10 +131,30 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                         <button className="btn-add-main" onClick={() => setShowModal(true)}><Plus size={18} /> New Campaign</button>
                         <div className="table-wrapper">
                             <table className="admin-table">
-                                <thead><tr><th>Image</th><th>Name</th><th>Progress</th></tr></thead>
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Name</th>
+                                        <th>Participation</th>
+                                        <th>Action</th> {/* Added Header */}
+                                    </tr>
+                                </thead>
                                 <tbody>
                                 {campaigns.map(c => (
-                                    <tr key={c.id}><td><img src={c.image} alt="" className="table-thumb" /></td><td><strong>{c.name}</strong></td><td>{c.slotsfilled} / {c.targetgoal}</td></tr>
+                                    <tr key={c.id}>
+                                        <td><img src={c.image} alt="" className="table-thumb" /></td>
+                                        <td><strong>{c.name}</strong></td>
+                                        <td>{c.slotsfilled} / {c.targetgoal}</td>
+                                        {/* Added Delete Action */}
+                                        <td>
+                                            <Trash2 
+                                                size={18} 
+                                                className="pointer" 
+                                                color="#ef4444" 
+                                                onClick={() => handleDeleteCampaign(c.id)} 
+                                            />
+                                        </td>
+                                    </tr>
                                 ))}
                                 </tbody>
                             </table>
@@ -165,7 +195,12 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                                 <thead><tr><th>Date</th><th>Group</th><th>Title</th><th>Action</th></tr></thead>
                                 <tbody>
                                     {volunteerEvents.map((ev) => (
-                                        <tr key={ev.id} className="teal-row"><td>{ev.date}</td><td>{ev.groupname}</td><td>{ev.title}</td><td><Trash2 size={18} className="pointer" color="#ef4444" onClick={() => {}} /></td></tr>
+                                        <tr key={ev.id} className="teal-row">
+                                            <td>{ev.date}</td>
+                                            <td>{ev.groupname}</td>
+                                            <td>{ev.title}</td>
+                                            <td><Trash2 size={18} className="pointer" color="#ef4444" onClick={() => {}} /></td>
+                                        </tr>
                                     ))}
                                 </tbody>
                             </table>
@@ -208,7 +243,7 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                 {renderView()}
             </main>
 
-            {/* Modal for New Campaign with Image Upload */}
+            {/* Campaign Modal */}
             {showModal && (
                 <div className="modal-bg">
                     <div className="modal-box">
@@ -230,10 +265,8 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                                 value={newCampaign.targetGoal} 
                                 onChange={e => setNewCampaign({...newCampaign, targetGoal: e.target.value})} 
                             />
-                            
-                            {/* File Upload Input */}
                             <div className="input-group">
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '10px', border: '1px dashed #ccc', borderRadius: '4px', textAlign: 'center' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '10px', border: '1px dashed #ccc', borderRadius: '4px' }}>
                                     <Upload size={18} />
                                     {imageFile ? imageFile.name : "Select Image File"}
                                     <input 
@@ -245,7 +278,6 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                                     />
                                 </label>
                             </div>
-
                             <button type="submit" className="btn-add-main" disabled={uploading}>
                                 {uploading ? "Uploading..." : "Save Campaign"}
                             </button>
@@ -254,7 +286,6 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                 </div>
             )}
             
-            {/* ... other modals remain the same ... */}
             {showVolModal && (
                 <div className="modal-bg"><div className="modal-box"><div className="modal-head"><h2>Log Volunteer Impact</h2><X onClick={() => setShowVolModal(false)} className="pointer" /></div><form onSubmit={handleAddVolunteer} className="modal-form"><input placeholder="Title" required value={newVolunteer.title} onChange={e => setNewVolunteer({...newVolunteer, title: e.target.value})} /><input placeholder="Group" required value={newVolunteer.groupname} onChange={e => setNewVolunteer({...newVolunteer, groupname: e.target.value})} /><input placeholder="Impact" required value={newVolunteer.impact} onChange={e => setNewVolunteer({...newVolunteer, impact: e.target.value})} /><input type="date" required value={newVolunteer.date} onChange={e => setNewVolunteer({...newVolunteer, date: e.target.value})} /><textarea placeholder="Description" required value={newVolunteer.description} onChange={e => setNewVolunteer({...newVolunteer, description: e.target.value})} /><button type="submit" className="btn-add-main">Save Impact</button></form></div></div>
             )}
