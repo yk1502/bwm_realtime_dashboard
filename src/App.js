@@ -14,18 +14,14 @@ import VolunteerTimeline from './pages/VolunteerTimeline';
 import VolunteerEventDetail from './pages/VolunteerEventDetail';
 
 function App() {
-    // 1. Supabase State (Real-time)
     const [financialData, setFinancialData] = useState({ current: 0, target: 0 });
     const [membershipCount, setMembershipCount] = useState(0);
     const [campaigns, setCampaigns] = useState([]);
-
-    // 2. Mock Data State (Local only - no Supabase yet)
     const [libraryItems, setLibraryItems] = useState([
         { id: 1, title: "Old Kuala Lumpur Map (1920)", donor: "John Doe", category: "Cartography", date: "22 Dec 2025", description: "A rare hand-drawn map showing the colonial layout of central KL." }
     ]);
-    const [volunteerEvents, setVolunteerEvents] = useState([
-        { id: 1, title: "Cleanup Drive", group: "Corporate Team A", impact: "50kg Waste Removed", date: "15 Sep 2025", description: "Large-scale effort to clean heritage grounds." }
-    ]);
+    // Changed: Initialized as empty array for database fetching
+    const [volunteerEvents, setVolunteerEvents] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -36,6 +32,10 @@ function App() {
             }
             const { data: campData } = await supabase.from('campaigns').select('*').order('created_at', { ascending: false });
             if (campData) setCampaigns(campData);
+
+            // Added: Fetch volunteer events from Supabase
+            const { data: volData } = await supabase.from('volunteer_events').select('*').order('date', { ascending: false });
+            if (volData) setVolunteerEvents(volData);
         };
 
         fetchData();
@@ -53,9 +53,18 @@ function App() {
                 else if (payload.eventType === 'DELETE') setCampaigns(prev => prev.filter(c => c.id !== payload.old.id));
             }).subscribe();
 
+        // Added: Real-time listener for volunteer_events
+        const volChannel = supabase.channel('realtime_volunteers')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'volunteer_events' }, (payload) => {
+                if (payload.eventType === 'INSERT') setVolunteerEvents(prev => [payload.new, ...prev]);
+                else if (payload.eventType === 'UPDATE') setVolunteerEvents(prev => prev.map(v => v.id === payload.new.id ? payload.new : v));
+                else if (payload.eventType === 'DELETE') setVolunteerEvents(prev => prev.filter(v => v.id !== payload.old.id));
+            }).subscribe();
+
         return () => {
             supabase.removeChannel(statsChannel);
             supabase.removeChannel(campChannel);
+            supabase.removeChannel(volChannel);
         };
     }, []);
 
@@ -80,8 +89,8 @@ function App() {
                         membershipCount={membershipCount} 
                     />
                 } />
-                {/* ... other routes remain unchanged */}
                 <Route path="/volunteer-timeline" element={<VolunteerTimeline events={volunteerEvents} />} />
+                <Route path="/volunteer-detail/:id" element={<VolunteerEventDetail events={volunteerEvents} />} />
                 <Route path="/library-archive" element={<LibraryArchive items={libraryItems} />} />
                 <Route path="/donate" element={<DonationPage financialData={financialData} />} />
                 <Route path="/membership-registration" element={<MembershipRegistration membershipCount={membershipCount} />} />

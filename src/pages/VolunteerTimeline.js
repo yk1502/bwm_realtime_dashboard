@@ -21,7 +21,7 @@ const VolunteerTimeline = ({ events }) => {
                     <th>Date</th>
                     <th>Event</th>
                     <th>Group</th>
-                    <th>Participants</th>
+                    <th>Impact Summary</th>
                     <th>Action</th>
                 </tr>
                 </thead>
@@ -30,10 +30,11 @@ const VolunteerTimeline = ({ events }) => {
                     <tr key={event.id}>
                         <td>{event.date}</td>
                         <td>{event.title}</td>
-                        <td>{event.group}</td>
+                        {/* Updated from 'group' to 'group_name' */}
+                        <td>{event.group_name}</td>
                         <td>{event.impact}</td>
                         <td>
-                            <button className="btn-view-small" onClick={() => navigate(`/volunteer-timeline/${event.id}`)}>
+                            <button className="btn-view-small" onClick={() => navigate(`/volunteer-detail/${event.id}`)}>
                                 View Details
                             </button>
                         </td>
@@ -44,4 +45,5 @@ const VolunteerTimeline = ({ events }) => {
         </div>
     );
 };
+
 export default VolunteerTimeline;

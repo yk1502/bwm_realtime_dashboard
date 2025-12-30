@@ -6,6 +6,8 @@ import './Pages.css';
 const VolunteerEventDetail = ({ events }) => {
     const { id } = useParams();
     const navigate = useNavigate();
+    
+    // Find event by ID
     const event = events.find(e => e.id === parseInt(id));
 
     if (!event) return <div className="page-wrapper-cream">Event not found.</div>;
@@ -25,11 +27,13 @@ const VolunteerEventDetail = ({ events }) => {
                 <div className="detail-body">
                     <section className="detail-section">
                         <h3><Users size={18} /> Organizing Group</h3>
-                        <p className="group-highlight">{event.group}</p>
+                        {/* Updated to use 'group_name' */}
+                        <p className="group-highlight">{event.group_name}</p>
                     </section>
 
                     <section className="detail-section">
                         <h3>Event Narrative</h3>
+                        {/* Displays the 'description' field from Supabase */}
                         <p className="main-description">{event.description}</p>
                     </section>
 
