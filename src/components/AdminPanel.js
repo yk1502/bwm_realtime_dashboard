@@ -1,3 +1,4 @@
+// src/components/AdminPanel.js
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import {
@@ -6,7 +7,8 @@ import {
 } from 'lucide-react';
 import './Admin.css';
 
-const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, membershipCount }) => {
+// Added onLogout to props
+const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, membershipCount, onLogout }) => {
     const [currentView, setCurrentView] = useState('campaigns');
     const [showModal, setShowModal] = useState(false);
     const [showVolModal, setShowVolModal] = useState(false);
@@ -159,7 +161,10 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                     <button onClick={() => setCurrentView('volunteer')} className={`nav-item ${currentView === 'volunteer' ? 'active' : ''}`}><Users size={18} /> Volunteers</button>
                     <button onClick={() => setCurrentView('financials')} className={`nav-item ${currentView === 'financials' ? 'active' : ''}`}><DollarSign size={18} /> Finance</button>
                 </nav>
-                <a href="/" className="exit-link"><LogOut size={18} /> Public Site</a>
+                {/* Changed from <a> to <button> to handle logout state */}
+                <button onClick={onLogout} className="exit-link" style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}>
+                    <LogOut size={18} /> Logout
+                </button>
             </aside>
             <main className="admin-body">
                 <header className="body-header"><h1>{currentView.toUpperCase()}</h1></header>
