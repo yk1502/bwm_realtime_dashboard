@@ -155,6 +155,20 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
         await supabase.from('site_stats').update({ membership_count: newValue }).eq('id', 1);
     };
 
+    const handleDeleteVolunteer = async (id) => {
+    if (!window.confirm("Delete this volunteer impact log?")) return;
+
+    const { error } = await supabase
+        .from('volunteer_events')   
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert(error.message);
+        console.error(error);
+    }
+    };
+
     const renderView = () => {
         switch(currentView) {
             case 'campaigns':
@@ -214,7 +228,7 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                                     {volunteerEvents.map((ev) => (
                                         <tr key={ev.id} className="teal-row">
                                             <td>{ev.date}</td><td>{ev.group_name}</td><td>{ev.title}</td>
-                                            <td><Trash2 size={18} className="pointer" color="#ef4444" onClick={() => {}} /></td>
+                                            <td><Trash2 size={18} className="pointer" color="#ef4444" onClick={() => handleDeleteVolunteer(ev.id)} /></td>
                                         </tr>
                                     ))}
                                 </tbody>
