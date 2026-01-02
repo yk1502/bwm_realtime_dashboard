@@ -75,7 +75,7 @@ const AdminLogin = ({ onLogin }) => {
                         />
                     </div>
 
-                    <button type="submit" className="btn-add-main" style={{ width: '100%', marginTop: '25px', padding: '12px' }}>
+                    <button type="submit" className="btn-add-main" style={{ width: 'auto', marginTop: '25px', padding: '10px 20px', marginLeft: 'auto', marginRight: 'auto', display: 'block' }}>
                         Login
                     </button>
                 </form>

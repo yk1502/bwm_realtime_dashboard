@@ -6,8 +6,7 @@ import './Dashboard.css';
 const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipCount, financialData }) => {
     const navigate = useNavigate();
     const [currentIndex, setCurrentIndex] = useState(0);
-
-    // Auto-slide logic for the Campaign Carousel
+  
     useEffect(() => {
         if (campaigns && campaigns.length > 0) {
             const timer = setInterval(() => nextSlide(), 5000);
