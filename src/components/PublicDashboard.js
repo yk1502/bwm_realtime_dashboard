@@ -22,7 +22,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
         <div className="dashboard-container">
             {/* --- Header Section --- */}
             <header className="dashboard-header">
-                <h1 className="title">Community Impact Dashboard</h1>
+                <h1 className="title">BWM Realtime Dashboard</h1>
                 <div className="header-actions">
                     <nav className="header-nav">
                         <span onClick={() => navigate('/volunteer-timeline')}>Volunteer Logs</span>
@@ -106,20 +106,25 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                         </div>
                         <div className="gauge-footer-actions">
                             <button className="btn-register" onClick={() => navigate('/membership-registration')}>Join Us</button>
+                            <div className="gauge-footer-divider"></div>
                             <button className="btn-donate" onClick={() => navigate('/donate')}>Donate</button>
                         </div>
                     </section>
 
                     {/* Library List: Updates to navigate to detail pages */}
                     <section className="card list-card">
-                        <div className="card-sidebar">
-                            <Smile size={32} color="#0f766e" />
+                        <div className="list-card-header">
+                            <div className="list-card-header-left">
+                                <div className="list-card-header-icon">
+                                    <Smile size={24} color="white" />
+                                </div>
+                                <h3 className="list-title">New Library Acquisitions</h3>
+                            </div>
                             <button className="btn-history" onClick={() => navigate('/library-archive')}>History</button>
                         </div>
                         <div className="card-list-content">
-                            <h3 className="list-title">New Library Acquisitions</h3>
                             {libraryItems.slice(0, 3).map((item) => (
-                                <div key={item.id} className="item-entry" onClick={() => navigate(`/library-detail/${item.id}`)} style={{cursor: 'pointer'}}>
+                                <div key={item.id} className="item-entry" onClick={() => navigate(`/library-detail/${item.id}`)}>
                                     <p className="item-title-text">{item.title}</p>
                                     <p className="item-meta">Donor: {item.donor} <span>{item.date}</span></p>
                                 </div>
@@ -129,14 +134,18 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
 
                     {/* Volunteer List: Updates to use 'group_name' and navigate to detail pages */}
                     <section className="card list-card">
-                        <div className="card-sidebar">
-                            <Smile size={32} color="#0f766e" />
+                        <div className="list-card-header">
+                            <div className="list-card-header-left">
+                                <div className="list-card-header-icon">
+                                    <Smile size={24} color="white" />
+                                </div>
+                                <h3 className="list-title">Volunteer Impact Timeline</h3>
+                            </div>
                             <button className="btn-history" onClick={() => navigate('/volunteer-timeline')}>History</button>
                         </div>
                         <div className="card-list-content">
-                            <h3 className="list-title">Volunteer Impact Timeline</h3>
                             {volunteerEvents.slice(0, 2).map((event) => (
-                                <div key={event.id} className="item-entry" onClick={() => navigate(`/volunteer-detail/${event.id}`)} style={{cursor: 'pointer'}}>
+                                <div key={event.id} className="item-entry" onClick={() => navigate(`/volunteer-detail/${event.id}`)}>
                                     <p className="item-title-text">{event.title}</p>
                                     <p className="item-meta">{event.impact} <span>{event.group_name} • {event.date}</span></p>
                                 </div>
