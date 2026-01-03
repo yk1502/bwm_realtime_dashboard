@@ -12,12 +12,12 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
     const [showModal, setShowModal] = useState(false);
     const [showVolModal, setShowVolModal] = useState(false);
     const [showLibModal, setShowLibModal] = useState(false);
-    
+
     // Upload/Processing State
     const [uploading, setUploading] = useState(false);
 
     // Campaign State (Single Image)
-    const [newCampaign, setNewCampaign] = useState({ name: '', targetGoal: 0, status: 'Active' });
+    const [newCampaign, setNewCampaign] = useState({ name: '', targetGoal: '', status: 'Active' });
     const [imageFile, setImageFile] = useState(null);
 
     // Volunteer State (Multiple Images)
@@ -53,7 +53,7 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
             const { data } = supabase.storage
                 .from(bucketName)
                 .getPublicUrl(filePath);
-            
+
             publicUrls.push(data.publicUrl);
         }
         return publicUrls;
@@ -81,14 +81,14 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
             }
             const { error } = await supabase.from('campaigns').insert([{
                 name: newCampaign.name,
-                targetgoal: parseInt(newCampaign.targetGoal),
+                targetgoal: parseInt(newCampaign.targetGoal) || 0,
                 image: publicUrl,
                 status: 'Active',
                 slotsfilled: 0
             }]);
             if (error) throw error;
             setShowModal(false);
-            setNewCampaign({ name: '', targetGoal: 0, status: 'Active' });
+            setNewCampaign({ name: '', targetGoal: '', status: 'Active' });
             setImageFile(null);
         } catch (error) {
             alert(error.message);
@@ -156,21 +156,21 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
     };
 
     const handleDeleteVolunteer = async (id) => {
-    if (!window.confirm("Delete this volunteer impact log?")) return;
+        if (!window.confirm("Delete this volunteer impact log?")) return;
 
-    const { error } = await supabase
-        .from('volunteer_events')   
-        .delete()
-        .eq('id', id);
+        const { error } = await supabase
+            .from('volunteer_events')
+            .delete()
+            .eq('id', id);
 
-    if (error) {
-        alert(error.message);
-        console.error(error);
-    }
+        if (error) {
+            alert(error.message);
+            console.error(error);
+        }
     };
 
     const renderView = () => {
-        switch(currentView) {
+        switch (currentView) {
             case 'campaigns':
                 return (
                     <div className="view-container">
@@ -179,14 +179,14 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                             <table className="admin-table">
                                 <thead><tr><th>Image</th><th>Name</th><th>Participation</th><th>Action</th></tr></thead>
                                 <tbody>
-                                {campaigns.map(c => (
-                                    <tr key={c.id}>
-                                        <td><img src={c.image} alt="" className="table-thumb" /></td>
-                                        <td><strong>{c.name}</strong></td>
-                                        <td>{c.slotsfilled} / {c.targetgoal}</td>
-                                        <td><Trash2 size={18} className="pointer" color="#ef4444" onClick={() => handleDeleteCampaign(c.id)} /></td>
-                                    </tr>
-                                ))}
+                                    {campaigns.map(c => (
+                                        <tr key={c.id}>
+                                            <td><img src={c.image} alt="" className="table-thumb" /></td>
+                                            <td><strong>{c.name}</strong></td>
+                                            <td>{c.slotsfilled} / {c.targetgoal}</td>
+                                            <td><Trash2 size={18} className="pointer" color="#ef4444" onClick={() => handleDeleteCampaign(c.id)} /></td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
@@ -281,11 +281,18 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                     <div className="modal-box">
                         <div className="modal-head"><h2>New Campaign</h2><X onClick={() => setShowModal(false)} className="pointer" /></div>
                         <form onSubmit={handleAddCampaign} className="modal-form">
-                            <input placeholder="Name" required value={newCampaign.name} onChange={e => setNewCampaign({...newCampaign, name: e.target.value})} />
-                            <input placeholder="Target Seats" type="number" required value={newCampaign.targetGoal} onChange={e => setNewCampaign({...newCampaign, targetGoal: e.target.value})} />
                             <div className="input-group">
+                                <label>Campaign Name</label>
+                                <input required value={newCampaign.name} onChange={e => setNewCampaign({ ...newCampaign, name: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Target Participation (Seats)</label>
+                                <input type="number" required value={newCampaign.targetGoal} onChange={e => setNewCampaign({ ...newCampaign, targetGoal: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Campaign Image</label>
                                 <label className="upload-label">
-                                    <Upload size={18} /> {imageFile ? imageFile.name : "Upload Images"}
+                                    <Upload size={18} /> {imageFile ? imageFile.name : "Click to Upload Cover Image"}
                                     <input type="file" accept="image/*" required style={{ display: 'none' }} onChange={e => setImageFile(e.target.files[0])} />
                                 </label>
                             </div>
@@ -294,21 +301,37 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                     </div>
                 </div>
             )}
-            
+
             {/* Volunteer Modal */}
             {showVolModal && (
                 <div className="modal-bg">
                     <div className="modal-box">
                         <div className="modal-head"><h2>Log Volunteer Impact</h2><X onClick={() => setShowVolModal(false)} className="pointer" /></div>
                         <form onSubmit={handleAddVolunteer} className="modal-form">
-                            <input placeholder="Title" required value={newVolunteer.title} onChange={e => setNewVolunteer({...newVolunteer, title: e.target.value})} />
-                            <input placeholder="Group" required value={newVolunteer.group_name} onChange={e => setNewVolunteer({...newVolunteer, group_name: e.target.value})} />
-                            <input placeholder="Impact" required value={newVolunteer.impact} onChange={e => setNewVolunteer({...newVolunteer, impact: e.target.value})} />
-                            <input type="date" required value={newVolunteer.date} onChange={e => setNewVolunteer({...newVolunteer, date: e.target.value})} />
-                            <textarea placeholder="Description" required value={newVolunteer.description} onChange={e => setNewVolunteer({...newVolunteer, description: e.target.value})} />
                             <div className="input-group">
+                                <label>Event Title</label>
+                                <input required value={newVolunteer.title} onChange={e => setNewVolunteer({ ...newVolunteer, title: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Group Name</label>
+                                <input required value={newVolunteer.group_name} onChange={e => setNewVolunteer({ ...newVolunteer, group_name: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Impact Metrics</label>
+                                <input required value={newVolunteer.impact} onChange={e => setNewVolunteer({ ...newVolunteer, impact: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Date</label>
+                                <input type="date" required value={newVolunteer.date} onChange={e => setNewVolunteer({ ...newVolunteer, date: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Description</label>
+                                <textarea required value={newVolunteer.description} onChange={e => setNewVolunteer({ ...newVolunteer, description: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Event Images</label>
                                 <label className="upload-label">
-                                    <ImageIcon size={18} /> {volImageFiles.length > 0 ? `${volImageFiles.length} selected` : "Upload Images"}
+                                    <ImageIcon size={18} /> {volImageFiles.length > 0 ? `${volImageFiles.length} file(s) selected` : "Select Images"}
                                     <input type="file" multiple accept="image/*" style={{ display: 'none' }} onChange={e => setVolImageFiles(Array.from(e.target.files))} />
                                 </label>
                             </div>
@@ -324,14 +347,30 @@ const AdminPanel = ({ campaigns, libraryItems, volunteerEvents, financialData, m
                     <div className="modal-box">
                         <div className="modal-head"><h2>Add Library Item</h2><X onClick={() => setShowLibModal(false)} className="pointer" /></div>
                         <form onSubmit={handleAddLibraryItem} className="modal-form">
-                            <input placeholder="Title" required value={newLibraryItem.title} onChange={e => setNewLibraryItem({...newLibraryItem, title: e.target.value})} />
-                            <input placeholder="Donor Name" required value={newLibraryItem.donor} onChange={e => setNewLibraryItem({...newLibraryItem, donor: e.target.value})} />
-                            <input placeholder="Category" required value={newLibraryItem.category} onChange={e => setNewLibraryItem({...newLibraryItem, category: e.target.value})} />
-                            <input type="date" required value={newLibraryItem.date} onChange={e => setNewLibraryItem({...newLibraryItem, date: e.target.value})} />
-                            <textarea placeholder="Item Description" required value={newLibraryItem.description} onChange={e => setNewLibraryItem({...newLibraryItem, description: e.target.value})} />
                             <div className="input-group">
+                                <label>Book/Item Title</label>
+                                <input required value={newLibraryItem.title} onChange={e => setNewLibraryItem({ ...newLibraryItem, title: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Donor Name</label>
+                                <input required value={newLibraryItem.donor} onChange={e => setNewLibraryItem({ ...newLibraryItem, donor: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Category</label>
+                                <input required value={newLibraryItem.category} onChange={e => setNewLibraryItem({ ...newLibraryItem, category: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Acquisition Date</label>
+                                <input type="date" required value={newLibraryItem.date} onChange={e => setNewLibraryItem({ ...newLibraryItem, date: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Description</label>
+                                <textarea required value={newLibraryItem.description} onChange={e => setNewLibraryItem({ ...newLibraryItem, description: e.target.value })} />
+                            </div>
+                            <div className="input-group">
+                                <label>Item Images</label>
                                 <label className="upload-label">
-                                    <ImageIcon size={18} /> {libImageFiles.length > 0 ? `${libImageFiles.length} selected` : "Upload Images"}
+                                    <ImageIcon size={18} /> {libImageFiles.length > 0 ? `${libImageFiles.length} file(s) selected` : "Select Images"}
                                     <input type="file" multiple accept="image/*" style={{ display: 'none' }} onChange={e => setLibImageFiles(Array.from(e.target.files))} />
                                 </label>
                             </div>
