@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Smile, ChevronLeft, ChevronRight, HeartHandshake, Coins } from 'lucide-react';
+import { LogOut, ChevronLeft, ChevronRight, HeartHandshake, Coins, BookOpen, HandHelping } from 'lucide-react';
 import './Dashboard.css';
 
 const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipCount, financialData }) => {
     const navigate = useNavigate();
     const [currentIndex, setCurrentIndex] = useState(0);
-  
+
     useEffect(() => {
         if (campaigns && campaigns.length > 0) {
             const timer = setInterval(() => nextSlide(), 5000);
@@ -25,7 +25,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                 <div className="header-actions">
                     <nav className="header-nav">
                         <span onClick={() => navigate('/volunteer-timeline')}>Volunteer Logs</span>
-                        <span onClick={() => navigate('/library-archive')}>Library Acquisitions</span>
+                        <span onClick={() => navigate('/library-archive')}>Library Logs</span>
                     </nav>
                     <LogOut
                         className="logout-icon"
@@ -41,7 +41,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                 {/* --- Left Column: Campaigns Carousel --- */}
                 <div className="left-column">
                     <section className="card carousel-container">
-                        <h2 className="card-header">Live Campaigns & Events</h2>
+                        <h2 className="card-header">Active Campaigns</h2>
                         <div className="carousel-view">
                             <div className="carousel-track" style={{ transform: `translateX(-${currentIndex * 100}%)` }}>
                                 {campaigns.map((c, idx) => (
@@ -54,8 +54,8 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                                                     <span><strong>{c.slotsfilled || 0} / {c.targetgoal || 0}</strong> Seats</span>
                                                 </div>
                                                 <div className="progress-bg">
-                                                    <div 
-                                                        className="progress-fill-orange" 
+                                                    <div
+                                                        className="progress-fill-orange"
                                                         style={{ width: `${(c.slotsfilled / (c.targetgoal || 1)) * 100}%` }}
                                                     ></div>
                                                 </div>
@@ -87,7 +87,7 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                         <div className="gauge-row-container">
                             <div className="gauge-section">
                                 <HeartHandshake size={24} color="#0f766e" />
-                                <h3 className="gauge-title">Membership</h3>
+                                <h3 className="gauge-title">Active Members</h3>
                                 <div className="stat-value">{membershipCount}</div>
                                 <div className="mini-progress-bg">
                                     <div className="progress-fill-teal" style={{ width: `${(membershipCount / 500) * 100}%` }}></div>
@@ -115,9 +115,9 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                         <div className="list-card-header">
                             <div className="list-card-header-left">
                                 <div className="list-card-header-icon">
-                                    <Smile size={24} color="white" />
+                                    <BookOpen size={24} color="white" />
                                 </div>
-                                <h3 className="list-title">New Library Acquisitions</h3>
+                                <h3 className="list-title">Recent Library Acquisitions</h3>
                             </div>
                             <button className="btn-history" onClick={() => navigate('/library-archive')}>History</button>
                         </div>
@@ -136,9 +136,9 @@ const PublicDashboard = ({ campaigns, libraryItems, volunteerEvents, membershipC
                         <div className="list-card-header">
                             <div className="list-card-header-left">
                                 <div className="list-card-header-icon">
-                                    <Smile size={24} color="white" />
+                                    <HandHelping size={24} color="white" />
                                 </div>
-                                <h3 className="list-title">Volunteer Impact Timeline</h3>
+                                <h3 className="list-title">Volunteer Activity Log</h3>
                             </div>
                             <button className="btn-history" onClick={() => navigate('/volunteer-timeline')}>History</button>
                         </div>
